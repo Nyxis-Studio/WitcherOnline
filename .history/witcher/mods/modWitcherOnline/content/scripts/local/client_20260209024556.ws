@@ -561,50 +561,51 @@ statemachine class r_MultiplayerClient
 
         // INVITE SYSTEM INTERCEPTION
         // Protocol: #INVITE:Target:Party
+        if(StrLen(lastChat) > 7)
+        {
+            invitePrefix = StrMid(lastChat, 0, 8);
+            if(invitePrefix == "#INVITE:")
+            {
+                rest = StrMid(lastChat, 8); 
+                
+                idx1 = StrFindFirst(rest, ":");
+                if(idx1 > -1)
+                {
+                    inviteTarget = StrMid(rest, 0, idx1);
+                    inviteParty = StrMid(rest, idx1 + 1);
+                    
+                    if(inviteTarget == theGame.r_getMultiplayerClient().getUsername())
+                    {
+                        theGame.r_getMultiplayerClient().partyManager.ReceiveInvite(username, inviteParty);
+                    }
+                }
+                
+                // Do NOT clear lastChat here, or it won't be sent to the server!
+                // lastChat = "";
+            }
+            else if(StrMid(lastChat, 0, 8) == "#DECLINE")
+            {
+                // Format: #DECLINE:Sender:Reason
+                rest = StrMid(lastChat, 9);
+                idx1 = StrFindFirst(rest, ":");
+                if(idx1 > -1)
+                {
+                    inviteTarget = StrMid(rest, 0, idx1); // Sender name
+                    inviteParty = StrMid(rest, idx1 + 1); // Reason
+                    
+                    if(inviteTarget != theGame.r_getMultiplayerClient().getUsername())
+                    {
+                         // Show notification
+                         theGame.GetGuiManager().ShowNotification(inviteTarget + " declined: " + inviteParty);
+                    }
+                }
+            }
+        }
+
         if (lastChatTime != prevChatTime)
         {
             if(StrLen(lastChat) > 0)
             {
-                // INVITE SYSTEM INTERCEPTION
-                // Protocol: #INVITE:Target:Party
-                if(StrLen(lastChat) > 7)
-                {
-                    invitePrefix = StrMid(lastChat, 0, 8);
-                    if(invitePrefix == "#INVITE:")
-                    {
-                        rest = StrMid(lastChat, 8); 
-                        
-                        idx1 = StrFindFirst(rest, ":");
-                        if(idx1 > -1)
-                        {
-                            inviteTarget = StrMid(rest, 0, idx1);
-                            inviteParty = StrMid(rest, idx1 + 1);
-                            
-                            if(inviteTarget == theGame.r_getMultiplayerClient().getUsername())
-                            {
-                                theGame.r_getMultiplayerClient().partyManager.ReceiveInvite(username, inviteParty);
-                            }
-                        }
-                    }
-                    else if(invitePrefix == "#DECLINE")
-                    {
-                        // Format: #DECLINE:Sender:Reason
-                        rest = StrMid(lastChat, 9);
-                        idx1 = StrFindFirst(rest, ":");
-                        if(idx1 > -1)
-                        {
-                            inviteTarget = StrMid(rest, 0, idx1); // Sender name
-                            inviteParty = StrMid(rest, idx1 + 1); // Reason
-                            
-                            if(inviteTarget != theGame.r_getMultiplayerClient().getUsername())
-                            {
-                                 // Show notification
-                                 theGame.GetGuiManager().ShowNotification(inviteTarget + " declined: " + inviteParty);
-                            }
-                        }
-                    }
-                }
-
                 // Only show chat bubble if it's NOT a hidden protocol message
                 if(StrMid(lastChat, 0, 8) != "#INVITE:" && StrMid(lastChat, 0, 8) != "#DECLINE")
                 {

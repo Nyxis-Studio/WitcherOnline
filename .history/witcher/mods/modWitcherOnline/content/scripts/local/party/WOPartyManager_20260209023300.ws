@@ -6,14 +6,12 @@ class WOPartyManager
     private var partyName : string;
     private var pendingInviteParty : string;
     private var pendingInviteSender : string;
-    private var pendingInviteTime : float;
 
     public function Init()
     {
         partyName = "";
         pendingInviteParty = "";
         pendingInviteSender = "";
-        pendingInviteTime = 0.0f;
     }
 
     public function SetPartyName(pName : string)
@@ -43,10 +41,6 @@ class WOPartyManager
     public function SendInvite(targetName : string)
     {
         var msg : string;
-        var i : int;
-        var players : array<r_RemotePlayer>;
-        var targetFound : bool;
-        var targetInParty : bool;
         
         if(!IsInParty())
         {
@@ -57,30 +51,6 @@ class WOPartyManager
         if(StrLen(targetName) == 0)
         {
             theGame.GetGuiManager().ShowNotification("Usage: /invite <username>");
-            return;
-        }
-        
-        // Sender-side validation: Check if target is already in a party
-        targetFound = false;
-        targetInParty = false;
-        players = theGame.r_getMultiplayerClient().getGlobalPlayers();
-        
-        for(i = 0; i < players.Size(); i+=1)
-        {
-            if(players[i].username == targetName)
-            {
-                targetFound = true;
-                if(StrLen(players[i].partyName) > 0)
-                {
-                    targetInParty = true;
-                }
-                break;
-            }
-        }
-        
-        if(targetFound && targetInParty)
-        {
-            theGame.GetGuiManager().ShowNotification("Player " + targetName + " is already in a party.");
             return;
         }
 
@@ -121,7 +91,6 @@ class WOPartyManager
 
         pendingInviteSender = sender;
         pendingInviteParty = pName;
-        pendingInviteTime = theGame.GetEngineTimeAsSeconds();
 
         theGame.GetGuiManager().ShowNotification("Party Invite received from " + sender + "!");
         theGame.GetGuiManager().ShowNotification("Type /accept to join '" + pName + "'");
@@ -167,54 +136,12 @@ class WOPartyManager
     {
         return pendingInviteParty;
     }
-
-    public function Update()
-    {
-        var curTime : float;
-        
-        if(StrLen(pendingInviteParty) > 0)
-        {
-            curTime = theGame.GetEngineTimeAsSeconds();
-            if( (curTime - pendingInviteTime) > 10.0f )
-            {
-                theGame.GetGuiManager().ShowNotification("Invite from " + pendingInviteSender + " expired.");
-                pendingInviteParty = "";
-                pendingInviteSender = "";
-                
-                // Force UI update to clear the invite box
-                theGame.r_getMultiplayerClient().UpdatePartyUI();
-            }
-        }
-    }
 }
 
 exec function createparty(partyNameStr : string)
 {
-    var i : int;
-    var players : array<r_RemotePlayer>;
-    var taken : bool;
-
     if(StrLen(partyNameStr) > 0)
     {
-        // Check uniqueness
-        
-        taken = false;
-        players = theGame.r_getMultiplayerClient().getGlobalPlayers();
-        for(i = 0; i < players.Size(); i+=1)
-        {
-            if(players[i].partyName == partyNameStr)
-            {
-                taken = true;
-                break;
-            }
-        }
-
-        if(taken)
-        {
-            theGame.GetGuiManager().ShowNotification("Party name '" + partyNameStr + "' already taken.");
-            return;
-        }
-
         theGame.r_getMultiplayerClient().partyManager.SetPartyName(partyNameStr);
         theGame.GetGuiManager().ShowNotification("Party Created: " + partyNameStr);
     }
