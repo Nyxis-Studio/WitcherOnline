@@ -968,8 +968,6 @@ statemachine class r_MultiplayerClient
         var oneliner : MP_SU_Oneliner;
         var foundGlobal : bool;
         var separatorIdx : int;
-        var partyName : string;
-        var cleanUsername : string;
 
         // Parse Username|PartyName manually since StrSplit is missing
         separatorIdx = StrFindFirst(username, "|");

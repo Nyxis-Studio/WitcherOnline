@@ -71,9 +71,6 @@ statemachine class r_MultiplayerClient
     private var prevChatTime : float;
     private var nameColors : array<r_NameColor>;
 
-    public var partyManager : WOPartyManager;
-    public var partyUI : WOPartyUI;
-
     private var maleTemp : CEntityTemplate;
     private var femaleTemp : CEntityTemplate;
     
@@ -264,12 +261,6 @@ statemachine class r_MultiplayerClient
         nameColors.PushBack(r_NameColor("mapledraws", "#5f90c6"));
         nameColors.PushBack(r_NameColor("imclumsy", "#5f90c6"));
 
-        partyManager = new WOPartyManager in this;
-        partyManager.Init();
-
-        partyUI = new WOPartyUI in this;
-        partyUI.Init();
-
         this.GotoState('WO_ClientIdle');
     }
 
@@ -284,14 +275,6 @@ statemachine class r_MultiplayerClient
     public function getNameColors() : array<r_NameColor>
     {
         return nameColors;
-    }
-
-    public function UpdatePartyUI()
-    {
-        if(partyUI)
-        {
-            partyUI.Update();
-        }
     }
 
     public function SetLocalEmoteState(anim : name, forceAnim : bool, loop : bool)
@@ -967,22 +950,6 @@ statemachine class r_MultiplayerClient
         var position: Vector;
         var oneliner : MP_SU_Oneliner;
         var foundGlobal : bool;
-        var separatorIdx : int;
-        var partyName : string;
-        var cleanUsername : string;
-
-        // Parse Username|PartyName manually since StrSplit is missing
-        separatorIdx = StrFindFirst(username, "|");
-        if(separatorIdx > -1)
-        {
-            cleanUsername = StrMid(username, 0, separatorIdx);
-            partyName = StrMid(username, separatorIdx + 1);
-        }
-        else
-        {
-            cleanUsername = username;
-            partyName = "";
-        }
 
         if((id == theGame.r_getMultiplayerClient().getUserId()) && !theGame.GetInGameConfigWrapper().GetVarValue('MPGhosts_Main', 'MPGhosts_ShowSelf'))
         {
@@ -1014,8 +981,7 @@ statemachine class r_MultiplayerClient
             if (globalPlayers[i].id == id)
             {
                 globalPlayers[i].pos = position;
-                globalPlayers[i].username = cleanUsername;
-                globalPlayers[i].partyName = partyName;
+                globalPlayers[i].username = username;
                 globalPlayers[i].area = area;
                 globalPlayers[i].lastUpdate = theGame.GetEngineTimeAsSeconds(); 
                 foundGlobal = true;
@@ -1027,8 +993,7 @@ statemachine class r_MultiplayerClient
         {
             p = new r_RemotePlayer in this;
             p.id = id;
-            p.username = cleanUsername;
-            p.partyName = partyName;
+            p.username = username;
             p.pos = position;
             p.area = area;
             p.lastUpdate = theGame.GetEngineTimeAsSeconds();
@@ -1059,8 +1024,7 @@ statemachine class r_MultiplayerClient
                     return;
                 }
 
-                players[i].username = cleanUsername;
-                players[i].partyName = partyName; // Note: Local players list usually just mirrors global, but logic is separate in this mod.
+                players[i].username = username;
                 players[i].lastUpdate = theGame.GetEngineTimeAsSeconds();
                 players[i].pos = position;
                 players[i].heading = heading;
@@ -1159,8 +1123,7 @@ statemachine class r_MultiplayerClient
         {
             p = new r_RemotePlayer in this;
             p.id = id;
-            p.username = cleanUsername;
-            p.partyName = partyName;
+            p.username = username;
             p.lastUpdate = theGame.GetEngineTimeAsSeconds();
             p.pos = position;
             p.heading = heading;
@@ -1404,13 +1367,6 @@ exec function mpghosts_getData(optional playerId : string, optional username : s
     {
         list += user;
     }
-
-    if(theGame.r_getMultiplayerClient().partyManager.IsInParty())
-    {
-        list += "|";
-        list += theGame.r_getMultiplayerClient().partyManager.GetPartyName();
-    }
-
     list += " nameend ";
 
     list += pos.X;

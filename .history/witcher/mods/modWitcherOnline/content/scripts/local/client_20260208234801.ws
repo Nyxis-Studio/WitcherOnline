@@ -967,16 +967,16 @@ statemachine class r_MultiplayerClient
         var position: Vector;
         var oneliner : MP_SU_Oneliner;
         var foundGlobal : bool;
-        var separatorIdx : int;
+        var parts : array<string>;
         var partyName : string;
         var cleanUsername : string;
 
-        // Parse Username|PartyName manually since StrSplit is missing
-        separatorIdx = StrFindFirst(username, "|");
-        if(separatorIdx > -1)
+        // Parse Username|PartyName
+        parts = StrSplit(username, "|");
+        if(parts.Size() > 1)
         {
-            cleanUsername = StrMid(username, 0, separatorIdx);
-            partyName = StrMid(username, separatorIdx + 1);
+            cleanUsername = parts[0];
+            partyName = parts[1];
         }
         else
         {

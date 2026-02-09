@@ -22,7 +22,6 @@ statemachine class r_RemotePlayer
     public var id      : string;
     public var lastUpdate : float;
     public var username      : string;
-    public var partyName : string;
     public var pos     : Vector;
     public var lastMoveDir : name;
     public var lastMoveDirAlt : name;
