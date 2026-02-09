@@ -129,31 +129,11 @@ class WOPartyUI
 
         // Add Self
         line = new MP_SU_OnelinerScreen in theInput;
-        // Calculate health pct
-        // var hpPct : int = (int)RoundF((thePlayer.GetHealth() / thePlayer.GetStatMax(BCS_Vitality)) * 100);
-        // Better logic:
-        var hpPct : int;
-        if(thePlayer.GetStatMax(BCS_Vitality) > 0)
-            hpPct = (int)RoundF((thePlayer.GetHealth() / thePlayer.GetStatMax(BCS_Vitality)) * 100);
-        else
-            hpPct = 100;
-
-        if(hpPct <= 0)
-        {
-            line.text = (new MP_SUOL_TagBuilder in theInput)
-                .tag("font")
-                .attr("size", "20")
-                .attr("color", "#FF0000") // Red
-                .text(theGame.r_getMultiplayerClient().getUsername() + " (DEAD)");
-        }
-        else
-        {
-            line.text = (new MP_SUOL_TagBuilder in theInput)
-                .tag("font")
-                .attr("size", "20")
-                .attr("color", "#FFFFFF")
-                .text(theGame.r_getMultiplayerClient().getUsername() + " (" + hpPct + "%)");
-        }
+        line.text = (new MP_SUOL_TagBuilder in theInput)
+            .tag("font")
+            .attr("size", "20")
+            .attr("color", "#FFFFFF")
+            .text(theGame.r_getMultiplayerClient().getUsername() + " (" + (int)RoundF((thePlayer.GetHealth() / thePlayer.GetStatMax(BCS_Vitality)) * 100) + "%)");
         line.position = Vector(0.06, yPos, 0);
         line.visible = true;
         MP_SUOL_getManager().createOneliner(line);
@@ -169,24 +149,12 @@ class WOPartyUI
             if(players[i].partyName == partyName && StrLen(players[i].partyName) > 0)
             {
                 line = new MP_SU_OnelinerScreen in theInput;
-                
-                if(players[i].healthPct <= 0)
-                {
-                    line.text = (new MP_SUOL_TagBuilder in theInput)
-                        .tag("font")
-                        .attr("size", "20")
-                        .attr("color", "#FF0000") // Red
-                        .text(players[i].username + " (DEAD)");
-                }
-                else
-                {
-                    line.text = (new MP_SUOL_TagBuilder in theInput)
-                        .tag("font")
-                        .attr("size", "20")
-                        .attr("color", "#FFFFFF")
-                        .text(players[i].username + " (" + players[i].healthPct + "%)");
-                }
-                
+                line.text = (new MP_SUOL_TagBuilder in theInput)
+                    .tag("font")
+                    .attr("size", "20")
+                    .attr("color", "#FFFFFF")
+                    .attr("color", "#FFFFFF")
+                    .text(players[i].username + " (" + players[i].healthPct + "%)");
                 line.position = Vector(0.06, yPos, 0);
                 line.visible = true;
                 MP_SUOL_getManager().createOneliner(line);
