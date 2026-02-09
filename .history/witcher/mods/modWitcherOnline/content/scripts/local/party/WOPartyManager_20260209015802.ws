@@ -90,6 +90,7 @@ class WOPartyManager
         pendingInviteParty = pName;
 
         theGame.GetGuiManager().ShowNotification("Party Invite received from " + sender + "!");
+        theGame.r_getMultiplayerClient().ShowOnScreenMessage("Invite from " + sender + "! Type /accept");
         theGame.GetGuiManager().ShowNotification("Type /accept to join '" + pName + "'");
     }
 
@@ -99,6 +100,7 @@ class WOPartyManager
         {
             SetPartyName(pendingInviteParty);
             theGame.GetGuiManager().ShowNotification("You joined " + pendingInviteParty);
+            theGame.r_getMultiplayerClient().ShowOnScreenMessage("Joined Party: " + pendingInviteParty);
             
             // Clear pending
             pendingInviteParty = "";

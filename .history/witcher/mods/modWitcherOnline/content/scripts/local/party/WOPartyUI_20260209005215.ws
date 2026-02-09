@@ -5,11 +5,9 @@ class WOPartyUI
 {
     private var header : MP_SU_OnelinerScreen;
     private var memberLines : array<MP_SU_OnelinerScreen>;
-    private var lastUpdate : float;
 
     public function Init()
     {
-        lastUpdate = 0.0f;
         // Cleanup old UI if any
         Clear();
     }
@@ -106,24 +104,6 @@ class WOPartyUI
                 yPos += 0.04;
                 memberCount += 1;
             }
-        }
-    }
-
-    public function UpdateLoop()
-    {
-        var curTime : float;
-        
-        // Only update if we are in a party
-        if(StrLen(theGame.r_getMultiplayerClient().partyManager.GetPartyName()) == 0)
-        {
-            return;
-        }
-
-        curTime = theGame.GetEngineTimeAsSeconds();
-        if( (curTime - lastUpdate) > 1.0 )
-        {
-            Update();
-            lastUpdate = curTime;
         }
     }
 }

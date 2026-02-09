@@ -70,11 +70,6 @@ class WOPartyManager
     {
         if(IsInParty())
         {
-            if(partyName == pName)
-            {
-                // Already in this party, ignore silently (prevents overwriting 'Joined' msg)
-                return;
-            }
             // Auto-decline or just ignore? Let's notify but warn.
             theGame.GetGuiManager().ShowNotification("Invite from " + sender + " to party '" + pName + "' ignored (Already in party).");
             return;

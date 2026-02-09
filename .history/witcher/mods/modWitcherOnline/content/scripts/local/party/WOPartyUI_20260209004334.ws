@@ -5,11 +5,9 @@ class WOPartyUI
 {
     private var header : MP_SU_OnelinerScreen;
     private var memberLines : array<MP_SU_OnelinerScreen>;
-    private var lastUpdate : float;
 
     public function Init()
     {
-        lastUpdate = 0.0f;
         // Cleanup old UI if any
         Clear();
     }
@@ -76,7 +74,7 @@ class WOPartyUI
             .tag("font")
             .attr("size", "20")
             .attr("color", "#FFFFFF")
-            .text(theGame.r_getMultiplayerClient().getUsername() + " (" + (int)RoundF((thePlayer.GetHealth() / thePlayer.GetStatMax(BCS_Vitality)) * 100) + "%)");
+            .text(theGame.r_getMultiplayerClient().getUsername() + " (" + Round((thePlayer.GetHealth() / thePlayer.GetMaxStat(BCS_Vitality)) * 100) + "%)");
         line.position = Vector(0.06, yPos, 0);
         line.visible = true;
         MP_SUOL_getManager().createOneliner(line);
@@ -106,24 +104,6 @@ class WOPartyUI
                 yPos += 0.04;
                 memberCount += 1;
             }
-        }
-    }
-
-    public function UpdateLoop()
-    {
-        var curTime : float;
-        
-        // Only update if we are in a party
-        if(StrLen(theGame.r_getMultiplayerClient().partyManager.GetPartyName()) == 0)
-        {
-            return;
-        }
-
-        curTime = theGame.GetEngineTimeAsSeconds();
-        if( (curTime - lastUpdate) > 1.0 )
-        {
-            Update();
-            lastUpdate = curTime;
         }
     }
 }

@@ -108,22 +108,4 @@ class WOPartyUI
             }
         }
     }
-
-    public function UpdateLoop()
-    {
-        var curTime : float;
-        
-        // Only update if we are in a party
-        if(StrLen(theGame.r_getMultiplayerClient().partyManager.GetPartyName()) == 0)
-        {
-            return;
-        }
-
-        curTime = theGame.GetEngineTimeAsSeconds();
-        if( (curTime - lastUpdate) > 1.0 )
-        {
-            Update();
-            lastUpdate = curTime;
-        }
-    }
 }

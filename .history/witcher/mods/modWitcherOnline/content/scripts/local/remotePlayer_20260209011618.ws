@@ -1158,26 +1158,15 @@ statemachine class r_RemotePlayer
         {
             prevChatTime = lastChatTime;
         }
-         if(lastChatTime != prevChatTime)
+        else if (lastChatTime != prevChatTime)
         {
-            if(StrLen(lastChat) > 0)
-            {
-                // Check for INVITE protocol to suppress visual bubble
-                if(StrLen(lastChat) > 7 && StrMid(lastChat, 0, 8) == "#INVITE:")
-                {
-                   // Do nothing visual
-                }
-                else
-                {
-                    updateStatus(lastChat);
-                    chatOneliner.visible = true;
-                    chatShownAt = theGame.GetEngineTimeAsSeconds();
-                }
-            }
+            updateStatus(lastChat);
+            chatOneliner.visible = true;
             prevChatTime = lastChatTime;
+            chatShownAt = theGame.GetEngineTimeAsSeconds();
         }
 
-        if(chatShownAt > 0.0f)
+        if (chatOneliner && chatOneliner.visible && chatShownAt >= 0.0f)
         {
             if ((theGame.GetEngineTimeAsSeconds() - chatShownAt) > 12.0f)
             {

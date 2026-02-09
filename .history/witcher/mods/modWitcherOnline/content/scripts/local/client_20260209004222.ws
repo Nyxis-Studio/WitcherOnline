@@ -519,35 +519,6 @@ statemachine class r_MultiplayerClient
         MP_SUOL_getManager().deleteByTag("MPClientChat" + id);
     }
     
-    // Fallback notification system for critical messages
-    public function ShowOnScreenMessage(msg : string)
-    {
-        var oneliner : MP_SU_OnelinerEntity;
-        
-        // Use a unique tag for system messages so they don't conflict with chat
-        var tag : string = "MPLocalSystemMsg" + id;
-        
-        // Delete existing one if any
-        MP_SUOL_getManager().deleteByTag(tag);
-
-        oneliner = new MP_SU_OnelinerEntity in theInput;
-        oneliner.text = (new MP_SUOL_TagBuilder in theInput)
-        .tag("font")
-        .attr("size", "25")
-        .attr("color", "#FFFF00") // Yellow for visibility
-        .text(msg);
-        oneliner.offset = Vector(0,0,2.2); // Slightly higher than chat
-        oneliner.visible = true;
-        oneliner.entity = thePlayer;
-        oneliner.tag = tag;
-        oneliner.render_distance = 20;
-
-        MP_SUOL_getManager().createOneliner(oneliner);
-        
-        // Auto-hide logic handled by update (or we can add a specific timer later)
-        // For now, let it persist until replaced or we add a cleanup in updatePlayerChat
-    }
-    
     public function updatePlayerChat()
     {
         var chatOneliner     : MP_SU_OnelinerEntity;
@@ -580,8 +551,8 @@ statemachine class r_MultiplayerClient
                     }
                 }
                 
-                // Do NOT clear lastChat here, or it won't be sent to the server!
-                // lastChat = "";
+                // Suppress this chat message
+                lastChat = "";
             }
         }
 
@@ -589,11 +560,7 @@ statemachine class r_MultiplayerClient
         {
             if(StrLen(lastChat) > 0)
             {
-                // Only show chat bubble if it's NOT a hidden protocol message
-                if(StrMid(lastChat, 0, 8) != "#INVITE:")
-                {
-                    createChatOneliner(lastChat);
-                }
+                createChatOneliner(lastChat);
             }
             prevChatTime = lastChatTime;
         }
@@ -1036,38 +1003,19 @@ statemachine class r_MultiplayerClient
         var foundGlobal : bool;
         var separatorIdx : int;
         var partyName : string;
-
         var cleanUsername : string;
-        var part2 : string;
-        var healthPctStr : string;
-        var healthPct : int;
 
-        // Parse Username|PartyName|HealthPct manually since StrSplit is missing
+        // Parse Username|PartyName manually since StrSplit is missing
         separatorIdx = StrFindFirst(username, "|");
         if(separatorIdx > -1)
         {
             cleanUsername = StrMid(username, 0, separatorIdx);
-            part2 = StrMid(username, separatorIdx + 1);
-            
-            // Check for second separator (Health)
-            separatorIdx = StrFindFirst(part2, "|");
-            if(separatorIdx > -1)
-            {
-                partyName = StrMid(part2, 0, separatorIdx);
-                healthPctStr = StrMid(part2, separatorIdx + 1);
-                healthPct = StringToInt(healthPctStr);
-            }
-            else
-            {
-                partyName = part2;
-                healthPct = 100;
-            }
+            partyName = StrMid(username, separatorIdx + 1);
         }
         else
         {
             cleanUsername = username;
             partyName = "";
-            healthPct = 100;
         }
 
         if((id == theGame.r_getMultiplayerClient().getUserId()) && !theGame.GetInGameConfigWrapper().GetVarValue('MPGhosts_Main', 'MPGhosts_ShowSelf'))
@@ -1101,9 +1049,7 @@ statemachine class r_MultiplayerClient
             {
                 globalPlayers[i].pos = position;
                 globalPlayers[i].username = cleanUsername;
-                globalPlayers[i].username = cleanUsername;
                 globalPlayers[i].partyName = partyName;
-                globalPlayers[i].healthPct = healthPct;
                 globalPlayers[i].area = area;
                 globalPlayers[i].lastUpdate = theGame.GetEngineTimeAsSeconds(); 
                 foundGlobal = true;
@@ -1116,10 +1062,7 @@ statemachine class r_MultiplayerClient
             p = new r_RemotePlayer in this;
             p.id = id;
             p.username = cleanUsername;
-            p.id = id;
-            p.username = cleanUsername;
             p.partyName = partyName;
-            p.healthPct = healthPct;
             p.pos = position;
             p.area = area;
             p.lastUpdate = theGame.GetEngineTimeAsSeconds();
@@ -1151,9 +1094,7 @@ statemachine class r_MultiplayerClient
                 }
 
                 players[i].username = cleanUsername;
-                players[i].username = cleanUsername;
                 players[i].partyName = partyName; // Note: Local players list usually just mirrors global, but logic is separate in this mod.
-                players[i].healthPct = healthPct;
                 players[i].lastUpdate = theGame.GetEngineTimeAsSeconds();
                 players[i].pos = position;
                 players[i].heading = heading;
@@ -1357,7 +1298,6 @@ statemachine class r_MultiplayerClient
             }
             
             players[i].updateGhost();
-            players[i].CheckInvites();
         }
     }
 
@@ -1510,10 +1450,10 @@ exec function mpghosts_getData(optional playerId : string, optional username : s
 
         // Append Health Pct
         currentHealth = thePlayer.GetHealth();
-        maxHealth = thePlayer.GetStatMax(BCS_Vitality);
+        maxHealth = thePlayer.GetMaxStat(BCS_Vitality);
         if(maxHealth > 0)
         {
-            healthPct = (int)RoundF( (currentHealth / maxHealth) * 100 );
+            healthPct = Round( (currentHealth / maxHealth) * 100 );
             list += "|";
             list += healthPct;
         }
@@ -2571,10 +2511,6 @@ state WO_Tick in r_MultiplayerClient
             parent.renderPlayers();
             parent.updatePlayerChat();
             parent.UpdateLocalEmoteLoop();
-            if(parent.partyUI)
-            {
-                parent.partyUI.UpdateLoop();
-            }
             parent.pruneGlobalPlayers(10);
 
             SleepOneFrame();
