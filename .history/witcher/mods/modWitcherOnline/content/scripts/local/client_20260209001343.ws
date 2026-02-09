@@ -522,13 +522,14 @@ statemachine class r_MultiplayerClient
     public function updatePlayerChat()
     {
         var chatOneliner     : MP_SU_OnelinerEntity;
+
+        chatOneliner = (MP_SU_OnelinerEntity)MP_SUOL_getManager().findByTag("MPClientChat" + id);
+
         var invitePrefix : string;
         var inviteTarget : string;
         var inviteParty : string;
         var rest : string;
         var idx1 : int;
-
-        chatOneliner = (MP_SU_OnelinerEntity)MP_SUOL_getManager().findByTag("MPClientChat" + id);
 
         // INVITE SYSTEM INTERCEPTION
         // Protocol: #INVITE:Target:Party
@@ -558,10 +559,7 @@ statemachine class r_MultiplayerClient
 
         if (lastChatTime != prevChatTime)
         {
-            if(StrLen(lastChat) > 0)
-            {
-                createChatOneliner(lastChat);
-            }
+            createChatOneliner(lastChat);
             prevChatTime = lastChatTime;
         }
 

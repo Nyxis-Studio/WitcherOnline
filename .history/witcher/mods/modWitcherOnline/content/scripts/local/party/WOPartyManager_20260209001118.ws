@@ -60,8 +60,7 @@ class WOPartyManager
         // internal function to send chat (handled in client.ws usually via mpghosts_chat exec, but we need direct access)
         // We will use theGame.r_getMultiplayerClient().mpghosts_chat(msg) if available or just execute the command.
         // Direct access:
-        theGame.r_getMultiplayerClient().setChat(msg);
-        theGame.r_getMultiplayerClient().setLastChatTime(theGame.GetEngineTimeAsSeconds());
+        theGame.r_getMultiplayerClient().mpghosts_chat(msg);
         
         theGame.GetGuiManager().ShowNotification("Invite sent to " + targetName);
     }
